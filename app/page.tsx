@@ -24,6 +24,7 @@ export default function Home() {
   const [leaderboard, setLeaderboard] = useState<Leader[]>([]);
   const [timeLeft, setTimeLeft] = useState(0);
   const [gameActive, setGameActive] = useState(false);
+  const [phase, setPhase] = useState(1);
   const [confetti, setConfetti] = useState(false);
   const [teamTasks, setTeamTasks] = useState<Record<string, Task[]>>({});
   const [currentTaskIndex, setCurrentTaskIndex] = useState<Record<string, number>>({});
@@ -64,14 +65,8 @@ export default function Home() {
     setLockedTeam(team.trim());
 
     const shuffled = shuffleTasks(tasks);
-    setTeamTasks(prev => ({
-      ...prev,
-      [team.trim()]: shuffled
-    }));
-    setCurrentTaskIndex(prev => ({
-      ...prev,
-      [team.trim()]: 0
-    }));
+    setTeamTasks(prev => ({ ...prev, [team.trim()]: shuffled }));
+    setCurrentTaskIndex(prev => ({ ...prev, [team.trim()]: 0 }));
 
     localStorage.setItem(`tasks_${team.trim()}`, JSON.stringify(shuffled));
     localStorage.setItem(`index_${team.trim()}`, "0");
@@ -80,26 +75,20 @@ export default function Home() {
   // ---------------- FETCH GAME STATE ----------------
   const fetchGameState = async () => {
     try {
-      const { data: game } = await supabase
-        .from("game_state")
-        .select("*")
-        .limit(1)
-        .maybeSingle();
-
+      const { data: game } = await supabase.from("game_state").select("*").limit(1).maybeSingle();
       if (!game) {
-        setGameActive(false);
-        setTimeLeft(0);
-        return;
+        setGameActive(false); setTimeLeft(0); return;
       }
+
+      setPhase(game.phase || 1);
 
       if (game.is_active && game.started_at) {
         const elapsed = Math.floor((Date.now() - new Date(game.started_at).getTime()) / 1000);
         const remaining = Math.max(game.duration_sec - elapsed, 0);
 
-        // --- 30 Minuten Restzeit Check ---
-        if (remaining <= 1800 && !needsArrival) {
-          setNeedsArrival(true);   // Aktiviert die Komm-hierher-Karte
-          setTimeLeft(1800);       // Timer auf 30 Minuten setzen
+        if (remaining <= 0 && !needsArrival) {
+          setNeedsArrival(true);      // Phase beendet, Treffpunkt anzeigen
+          setTimeLeft(0);
         } else {
           setTimeLeft(remaining);
         }
@@ -151,9 +140,7 @@ export default function Home() {
   // ---------------- TIMER ----------------
   useEffect(() => {
     if (!gameActive || timeLeft <= 0 || needsArrival) return;
-    const interval = setInterval(() => {
-      setTimeLeft(prev => Math.max(prev - 1, 0));
-    }, 1000);
+    const interval = setInterval(() => setTimeLeft(prev => Math.max(prev - 1, 0)), 1000);
     return () => clearInterval(interval);
   }, [gameActive, timeLeft, needsArrival]);
 
@@ -179,66 +166,34 @@ export default function Home() {
       .on("postgres_changes", { event: "*", schema: "public", table: "game_state" }, fetchGameState)
       .subscribe();
     const interval = setInterval(fetchGameState, 5000);
-    return () => {
-      supabase.removeChannel(channel);
-      clearInterval(interval);
-    };
+    return () => { supabase.removeChannel(channel); clearInterval(interval); };
   }, [lockedTeam]);
 
-// ---------------- LIVE LOCATION ----------------
-// ---------------- LIVE LOCATION ----------------
-// ---------------- LIVE LOCATION ----------------
-useEffect(() => {
-  if (!lockedTeam) {
-    alert("❌ Kein Team gesetzt");
-    return;
-  }
+  // ---------------- LIVE LOCATION ----------------
+  useEffect(() => {
+    if (!lockedTeam) return;
 
-  alert("🚀 Geolocation startet für: " + lockedTeam);
+    let lastSent = 0;
+    const watchId = navigator.geolocation.watchPosition(
+      async (pos) => {
+        setPlayerLat(pos.coords.latitude); setPlayerLng(pos.coords.longitude);
+        const now = Date.now();
+        if (now - lastSent < 5000) return;
+        lastSent = now;
 
-  let lastSent = 0;
-
-  const watchId = navigator.geolocation.watchPosition(
-    async (pos) => {
-
-      setPlayerLat(pos.coords.latitude);
-      setPlayerLng(pos.coords.longitude);
-
-      const now = Date.now();
-
-      if (now - lastSent < 5000) return;
-      lastSent = now;
-
-
-      const { error } = await supabase
-        .from("locations")
-        .upsert({
+        await supabase.from("locations").upsert({
           team: lockedTeam,
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
           updated_at: new Date()
         });
+      },
+      (err) => { console.error("Geolocation Fehler:", err); },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
+    );
 
-      if (error) {
-        alert("❌ Supabase Fehler: " + error.message);
-      }
-    },
-    (err) => {
-      alert("❌ Geolocation Fehler: " + err.message);
-    },
-    {
-      enableHighAccuracy: true,
-      maximumAge: 10000,
-      timeout: 20000
-    }
-  );
-
-  return () => {
-    alert("🛑 Tracking gestoppt");
-    navigator.geolocation.clearWatch(watchId);
-  };
-
-}, [lockedTeam]);
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [lockedTeam]);
 
   // ---------------- UPLOAD ----------------
   const handleUpload = async (file?:File) => {
@@ -257,11 +212,7 @@ useEffect(() => {
     await supabase.storage.from("photos").upload(fileName,file);
     const url = supabase.storage.from("photos").getPublicUrl(fileName).data.publicUrl;
     await supabase.from("submissions").insert({
-      team: lockedTeam,
-      task: taskIdx,
-      image_url: url,
-      lat: pos.lat,
-      lng: pos.lng
+      team: lockedTeam, task: taskIdx, image_url: url, lat: pos.lat, lng: pos.lng
     });
 
     const nextIndex = taskIdx + 1;
@@ -272,8 +223,7 @@ useEffect(() => {
   };
 
   const formatTime = (s:number)=> {
-    const m = Math.floor(s/60);
-    const sec = s % 60;
+    const m = Math.floor(s/60); const sec = s % 60;
     return `${m.toString().padStart(2,"0")}:${sec.toString().padStart(2,"0")}`;
   };
 
@@ -282,18 +232,16 @@ useEffect(() => {
   return (
     <div className="p-4 max-w-4xl mx-auto">
       {confetti && <Confetti />}
-      <h1 className="text-3xl font-bold text-center mb-4">🎯 Birthday Challenge</h1>
+      <h1 className="text-3xl font-bold text-center mb-4">🎯 Birthday Challenge - Phase {phase}</h1>
 
       {needsArrival ? (
         <>
           <p className="text-center text-lg mb-4 font-bold text-red-600">
-            ⏱ 30 Minuten Restzeit erreicht! Komm hierher:
+            ⏱ Phase {phase} beendet! Treffpunkt:
           </p>
           {playerLat && playerLng ? (
             <Map leaderboard={leaderboard} player={{ lat: playerLat, lng: playerLng }} />
-          ) : (
-            <p className="text-center">Lade aktuelle Position…</p>
-          )}
+          ) : (<p className="text-center">Lade aktuelle Position…</p>)}
         </>
       ) : (
         <>
@@ -303,12 +251,7 @@ useEffect(() => {
 
           {!lockedTeam ? (
             <>
-              <input
-                className="border p-2 w-full mb-2"
-                placeholder="Team Name"
-                value={team}
-                onChange={e=>setTeam(e.target.value)}
-              />
+              <input className="border p-2 w-full mb-2" placeholder="Team Name" value={team} onChange={e=>setTeam(e.target.value)} />
               <button onClick={lockTeam} className="bg-blue-500 text-white w-full p-2 mb-4">Team speichern</button>
             </>
           ) : <p className="text-center mb-4 font-bold">Team: {lockedTeam}</p>}

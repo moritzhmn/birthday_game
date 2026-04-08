@@ -26,6 +26,7 @@ export default function AdminPanel() {
     return () => clearInterval(interval);
   }, []);
 
+  // -------------------- Spiel starten --------------------
   const startGame = async () => {
     setLoading(true);
     try {
@@ -60,6 +61,30 @@ export default function AdminPanel() {
     }
   };
 
+  // -------------------- Phase starten --------------------
+  const startPhase = async (phaseNumber: number) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/game-control", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "start", key: ADMIN_KEY, phase: phaseNumber, duration_sec: 1800 }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        fetchStatus();
+        alert(`✅ Phase ${phaseNumber} gestartet!`);
+      } else {
+        alert("❌ Fehler: " + JSON.stringify(data.error));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Fehler beim Starten der Phase");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatTime = (s: number) => {
     const m = Math.floor(s / 60);
     const sec = s % 60;
@@ -71,6 +96,7 @@ export default function AdminPanel() {
       <h2 className="text-2xl font-bold mb-4">🎮 Admin Panel</h2>
       <p>Status: {game?.is_active ? "Aktiv" : "Inaktiv"}</p>
       {game?.is_active && <p>Timer: {formatTime(timeLeft)}</p>}
+      <p>Aktuelle Phase: {game?.phase || 0}</p>
 
       <div className="flex gap-2 mt-4">
         <button
@@ -86,6 +112,30 @@ export default function AdminPanel() {
           disabled={loading || !game?.is_active}
         >
           Spiel stoppen
+        </button>
+      </div>
+
+      <div className="flex gap-2 mt-4">
+        <button
+          className="bg-blue-500 text-white p-2 rounded flex-1"
+          onClick={() => startPhase(1)}
+          disabled={loading}
+        >
+          Phase 1 starten
+        </button>
+        <button
+          className="bg-blue-500 text-white p-2 rounded flex-1"
+          onClick={() => startPhase(2)}
+          disabled={loading}
+        >
+          Phase 2 starten
+        </button>
+        <button
+          className="bg-blue-500 text-white p-2 rounded flex-1"
+          onClick={() => startPhase(3)}
+          disabled={loading}
+        >
+          Phase 3 starten
         </button>
       </div>
     </div>

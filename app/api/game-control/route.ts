@@ -34,11 +34,11 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// -------------------- POST → Start/Stop --------------------
+// -------------------- POST → Start/Stop/Phase --------------------
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { action, key } = body;
+    const { action, key, phase, duration_sec } = body;
 
     // Auth check
     if (key !== ADMIN_KEY) {
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     if (!game) {
       const { data: newGame, error: insertError } = await supabase
         .from("game_state")
-        .insert({ is_active: false, started_at: null, duration_sec: 3600 })
+        .insert({ is_active: false, started_at: null, duration_sec: 1800, phase: 1 })
         .select()
         .maybeSingle();
 
@@ -73,8 +73,15 @@ export async function POST(req: NextRequest) {
     // -------------------- Action --------------------
     if (action === "start") {
       const now = new Date().toISOString();
-      await supabase.from("game_state").update({ is_active: true, started_at: now }).eq("id", gameId);
-      return NextResponse.json({ message: "Game started", started_at: now });
+
+      // Phase & Dauer setzen, falls übergeben
+      const updateData: any = { is_active: true, started_at: now };
+      if (phase) updateData.phase = phase;
+      if (duration_sec) updateData.duration_sec = duration_sec;
+
+      await supabase.from("game_state").update(updateData).eq("id", gameId);
+
+      return NextResponse.json({ message: `Game started (Phase ${phase || game.phase})`, started_at: now });
     }
 
     if (action === "stop") {
