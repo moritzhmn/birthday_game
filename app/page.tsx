@@ -305,14 +305,20 @@ export default function Home() {
 
   // ---------------- LOCATION ----------------
 
-  useEffect(() => {
+// ---------------- LOCATION ----------------
 
-    if (!lockedTeam) return;
+useEffect(() => {
 
-    let lastSent = 0;
+  if (!lockedTeam) return;
 
-    const watchId =
-      navigator.geolocation.watchPosition(
+  let watchId: number;
+  let lastSent = 0;
+
+  navigator.geolocation.getCurrentPosition(
+
+    () => {
+
+      watchId = navigator.geolocation.watchPosition(
 
         async (pos) => {
 
@@ -321,7 +327,7 @@ export default function Home() {
           if (now - lastSent < 5000) return;
           lastSent = now;
 
-          await supabase
+          const { error } = await supabase
             .from("locations")
             .upsert({
 
@@ -332,23 +338,43 @@ export default function Home() {
 
             });
 
+          if (error) {
+            console.error("Location error:", error);
+          }
+
         },
 
-        console.error,
+        (err) => {
+          console.error("GPS Error:", err);
+        },
 
         {
           enableHighAccuracy: true,
-          maximumAge: 10000,
+          maximumAge: 0,
           timeout: 20000
         }
 
       );
 
-    return () =>
+    },
+
+    (err) => {
+      console.error("Permission denied", err);
+    },
+
+    {
+      enableHighAccuracy: true
+    }
+
+  );
+
+  return () => {
+    if (watchId) {
       navigator.geolocation.clearWatch(watchId);
+    }
+  };
 
-  }, [lockedTeam]);
-
+}, [lockedTeam]);
 
   // ---------------- UPLOAD ----------------
 
