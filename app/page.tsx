@@ -311,21 +311,39 @@ useEffect(() => {
 
   if (!lockedTeam) return;
 
+  alert("Location init for team: " + lockedTeam);
+
   let watchId: number;
   let lastSent = 0;
+
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
 
   navigator.geolocation.getCurrentPosition(
 
     () => {
 
+      alert("Permission granted");
+
       watchId = navigator.geolocation.watchPosition(
 
         async (pos) => {
+
+          alert("Location received");
 
           const now = Date.now();
 
           if (now - lastSent < 5000) return;
           lastSent = now;
+
+          alert(
+            "Sending: " +
+            pos.coords.latitude +
+            " / " +
+            pos.coords.longitude
+          );
 
           const { error } = await supabase
             .from("locations")
@@ -339,13 +357,17 @@ useEffect(() => {
             });
 
           if (error) {
-            console.error("Location error:", error);
+            alert("Supabase error: " + error.message);
+            console.error(error);
+          } else {
+            alert("Location sent!");
           }
 
         },
 
         (err) => {
-          console.error("GPS Error:", err);
+          alert("Watch error: " + err.message);
+          console.error(err);
         },
 
         {
@@ -359,7 +381,8 @@ useEffect(() => {
     },
 
     (err) => {
-      console.error("Permission denied", err);
+      alert("Permission denied: " + err.message);
+      console.error(err);
     },
 
     {
