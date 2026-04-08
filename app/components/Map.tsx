@@ -1,26 +1,18 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap, CircleMarker } from "react-leaflet";
 import L from "leaflet";
 import { useEffect } from "react";
 
-function AutoFit({ leaderboard }: any) {
+function AutoFit({ points }: { points: [number, number][] }) {
   const map = useMap();
-
   useEffect(() => {
-    const points = leaderboard
-      .filter((t: any) => t.lastLat && t.lastLng)
-      .map((t: any) => [t.lastLat, t.lastLng]);
-
-    if (points.length > 0) {
-      map.fitBounds(points, { padding: [50, 50] });
-    }
-  }, [leaderboard, map]);
-
+    if (points.length > 0) map.fitBounds(points, { padding: [50, 50] });
+  }, [points, map]);
   return null;
 }
 
-export default function Map({ leaderboard }: any) {
+export default function Map({ leaderboard, meeting, player }: any) {
   useEffect(() => {
     delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
@@ -30,31 +22,32 @@ export default function Map({ leaderboard }: any) {
     });
   }, []);
 
-  if (!leaderboard) return null;
+  const points: [number, number][] = [
+    ...leaderboard.filter((t: any) => t.lastLat && t.lastLng).map((t: any) => [t.lastLat, t.lastLng]),
+    ...(player ? [[player.lat, player.lng]] : []),
+    ...(meeting ? [[meeting.lat, meeting.lng]] : [])
+  ];
 
   return (
     <MapContainer
-      key={leaderboard.length}
-      center={[51.3397, 12.3731]}
+      center={points.length > 0 ? points[0] : [53.5511, 9.9937]}
       zoom={13}
       scrollWheelZoom
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      <AutoFit leaderboard={leaderboard} />
+      <AutoFit points={points} />
 
       {leaderboard.map((t: any) =>
         t.lastLat && t.lastLng ? (
-          <Marker
-            key={t.team + "-" + t.lastLat + "-" + t.lastLng}
-            position={[t.lastLat, t.lastLng]}
-          >
-            <Popup>
-              {t.team}: {t.score}P
-            </Popup>
-          </Marker>
+          <CircleMarker key={t.team} center={[t.lastLat, t.lastLng]} pathOptions={{ color: t.color }} radius={10}>
+            <Popup>{t.team}: {t.score}P</Popup>
+          </CircleMarker>
         ) : null
       )}
+
+      {meeting && <Marker position={[meeting.lat, meeting.lng]}><Popup>Treffpunkt</Popup></Marker>}
+      {player && <CircleMarker center={[player.lat, player.lng]} pathOptions={{ color: "black" }} radius={8}><Popup>Du</Popup></CircleMarker>}
     </MapContainer>
   );
 }

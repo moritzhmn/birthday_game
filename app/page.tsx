@@ -45,21 +45,18 @@ const phaseMeetingPoints: Record<number, { lat: number; lng: number }> = {
 };
 
 export default function Home() {
-  const [team,setTeam] = useState("");
-  const [lockedTeam,setLockedTeam] = useState<string | null>(null);
-
-  const [leaderboard,setLeaderboard] = useState<Leader[]>([]);
-  const [timeLeft,setTimeLeft] = useState(0);
-  const [gameActive,setGameActive] = useState(false);
-  const [phase,setPhase] = useState(1);
-  const [confetti,setConfetti] = useState(false);
-  const [needsArrival,setNeedsArrival] = useState(false);
-
-  const [teamTasks,setTeamTasks] = useState<Record<string, Task[]>>({});
-  const [currentTaskIndex,setCurrentTaskIndex] = useState<Record<string, number>>({});
-
-  const [playerLat,setPlayerLat] = useState<number>();
-  const [playerLng,setPlayerLng] = useState<number>();
+  const [team, setTeam] = useState("");
+  const [lockedTeam, setLockedTeam] = useState<string | null>(null);
+  const [leaderboard, setLeaderboard] = useState<Leader[]>([]);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [gameActive, setGameActive] = useState(false);
+  const [phase, setPhase] = useState(1);
+  const [confetti, setConfetti] = useState(false);
+  const [needsArrival, setNeedsArrival] = useState(false);
+  const [teamTasks, setTeamTasks] = useState<Record<string, Task[]>>({});
+  const [currentTaskIndex, setCurrentTaskIndex] = useState<Record<string, number>>({});
+  const [playerLat, setPlayerLat] = useState<number | null>(null);
+  const [playerLng, setPlayerLng] = useState<number | null>(null);
 
   // ---------------- TEAM ----------------
   useEffect(() => {
@@ -80,7 +77,7 @@ export default function Home() {
   }, [phase]);
 
   const lockTeam = () => {
-    if(!team.trim()) return;
+    if (!team.trim()) return;
     localStorage.setItem("team", team.trim());
     setLockedTeam(team.trim());
     const shuffled = shuffleTasks(phaseTasks[phase]);
@@ -90,18 +87,17 @@ export default function Home() {
     localStorage.setItem(`index_${team.trim()}`, "0");
   };
 
-  // ---------------- FETCH GAME ----------------
+  // ---------------- FETCH GAME STATE ----------------
   const fetchGameState = async () => {
     const { data: game } = await supabase.from("game_state").select("*").limit(1).maybeSingle();
-    if(!game) return;
+    if (!game) return;
 
     setPhase(game.phase || 1);
 
-    if(game.is_active && game.started_at){
-      const elapsed = Math.floor((Date.now() - new Date(game.started_at).getTime())/1000);
-      const remaining = Math.max(game.duration_sec - elapsed,0);
-
-      if(remaining <= 0){
+    if (game.is_active && game.started_at) {
+      const elapsed = Math.floor((Date.now() - new Date(game.started_at).getTime()) / 1000);
+      const remaining = Math.max(game.duration_sec - elapsed, 0);
+      if (remaining <= 0) {
         setNeedsArrival(true);
         setGameActive(false);
         setTimeLeft(0);
@@ -118,17 +114,15 @@ export default function Home() {
     // ---------------- SCORES ----------------
     const { data: submissions } = await supabase.from("submissions").select("*");
     const scores: Record<string, Leader> = {};
-    submissions?.forEach((s: Submission)=>{
-      if(!scores[s.team]){
-        scores[s.team] = { team: s.team, score: 0, color: TEAM_COLORS[s.team.length % TEAM_COLORS.length] };
-      }
+    submissions?.forEach((s: Submission) => {
+      if (!scores[s.team]) scores[s.team] = { team: s.team, score: 0, color: TEAM_COLORS[s.team.length % TEAM_COLORS.length] };
       scores[s.team].score += phaseTasks[phase][s.task]?.points || 0;
     });
 
     // ---------------- LOCATIONS ----------------
     const { data: locations } = await supabase.from("locations").select("*");
-    locations?.forEach((loc:any)=>{
-      if(!scores[loc.team]) return;
+    locations?.forEach((loc: any) => {
+      if (!scores[loc.team]) scores[loc.team] = { team: loc.team, score: 0, color: TEAM_COLORS[loc.team.length % TEAM_COLORS.length] };
       scores[loc.team].lastLat = loc.lat;
       scores[loc.team].lastLng = loc.lng;
     });
@@ -136,116 +130,107 @@ export default function Home() {
     setLeaderboard(Object.values(scores).sort((a,b)=>b.score-b.score));
   };
 
+  // ---------------- TIMER ----------------
+  useEffect(() => {
+    if (!gameActive || timeLeft <= 0) return;
+    const interval = setInterval(() => setTimeLeft(prev => Math.max(prev - 1, 0)), 1000);
+    return () => clearInterval(interval);
+  }, [gameActive, timeLeft]);
+
   // ---------------- REALTIME ----------------
-  useEffect(()=>{
+  useEffect(() => {
     fetchGameState();
     const channel = supabase.channel("live")
-      .on("postgres_changes",{ event:"*", schema:"public", table:"submissions" },fetchGameState)
-      .on("postgres_changes",{ event:"*", schema:"public", table:"game_state" },fetchGameState)
+      .on("postgres_changes", { event: "*", schema: "public", table: "submissions" }, fetchGameState)
+      .on("postgres_changes", { event: "*", schema: "public", table: "game_state" }, fetchGameState)
+      .on("postgres_changes", { event: "*", schema: "public", table: "locations" }, fetchGameState)
       .subscribe();
-    const interval = setInterval(fetchGameState,5000);
-    return ()=>{ supabase.removeChannel(channel); clearInterval(interval); };
-  },[]);
+    const interval = setInterval(fetchGameState, 5000);
+    return () => { supabase.removeChannel(channel); clearInterval(interval); clearInterval(interval); };
+  }, [lockedTeam]);
 
-  // ---------------- TIMER ----------------
-  useEffect(()=>{
-    if(!gameActive || timeLeft<=0) return;
-    const interval = setInterval(()=>{ setTimeLeft(prev=>Math.max(prev-1,0)); },1000);
-    return ()=>clearInterval(interval);
-  },[gameActive,timeLeft]);
-
-  // ---------------- LOCATION (only on arrival) ----------------
-  useEffect(()=>{
-    if(!needsArrival) return;
-    navigator.geolocation.getCurrentPosition(
-      p => { setPlayerLat(p.coords.latitude); setPlayerLng(p.coords.longitude); },
-      () => { setPlayerLat(undefined); setPlayerLng(undefined); }
+  // ---------------- LIVE LOCATION ----------------
+  useEffect(() => {
+    if (!lockedTeam) return;
+    let lastSent = 0;
+    const watchId = navigator.geolocation.watchPosition(
+      async (pos) => {
+        setPlayerLat(pos.coords.latitude);
+        setPlayerLng(pos.coords.longitude);
+        const now = Date.now();
+        if (now - lastSent < 5000) return;
+        lastSent = now;
+        await supabase.from("locations").upsert({
+          team: lockedTeam,
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          updated_at: new Date()
+        });
+      },
+      (err) => console.error(err),
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
     );
-  },[needsArrival]);
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [lockedTeam]);
 
   // ---------------- UPLOAD ----------------
-  const handleUpload = async (file?:File) => {
+  const handleUpload = async (file?: File) => {
     if(!file || !lockedTeam || !gameActive) return;
     const taskIdx = currentTaskIndex[lockedTeam];
-    const fileName = `${lockedTeam}-${taskIdx}-${Date.now()}.jpg`;
-
-    const pos = await new Promise<{lat:number,lng:number}>(res=>{
-      navigator.geolocation.getCurrentPosition(
-        p => res({lat:p.coords.latitude,lng:p.coords.longitude}),
-        () => res({lat:0,lng:0})
-      );
-    });
-
-    await supabase.storage.from("photos").upload(fileName,file);
-    const url = supabase.storage.from("photos").getPublicUrl(fileName).data.publicUrl;
-
-    await supabase.from("submissions").insert({
-      team: lockedTeam,
-      task: taskIdx,
-      image_url: url,
-      lat: pos.lat,
-      lng: pos.lng
-    });
-
-    setCurrentTaskIndex(prev=>({...prev,[lockedTeam]:taskIdx+1}));
-    localStorage.setItem(`index_${lockedTeam}`, (taskIdx+1).toString());
-
-    setConfetti(true);
-    setTimeout(()=>setConfetti(false),2000);
+    await supabase.storage.from("photos").upload(`${lockedTeam}-${taskIdx}-${Date.now()}.jpg`, file);
+    const url = supabase.storage.from("photos").getPublicUrl(`${lockedTeam}-${taskIdx}-${Date.now()}.jpg`).data.publicUrl;
+    await supabase.from("submissions").insert({ team: lockedTeam, task: taskIdx, image_url: url, lat: playerLat, lng: playerLng });
+    setCurrentTaskIndex(prev => ({ ...prev, [lockedTeam]: taskIdx + 1 }));
+    localStorage.setItem(`index_${lockedTeam}`, (taskIdx + 1).toString());
+    setConfetti(true); setTimeout(()=>setConfetti(false),2000);
   };
 
-  const formatTime = (s:number) => { const m=Math.floor(s/60); const sec=s%60; return `${m.toString().padStart(2,"0")}:${sec.toString().padStart(2,"0")}`; };
-
+  const formatTime = (s: number) => { const m = Math.floor(s/60); const sec = s%60; return `${m.toString().padStart(2,"0")}:${sec.toString().padStart(2,"0")}`; };
   const currentTask = lockedTeam ? teamTasks[lockedTeam]?.[currentTaskIndex[lockedTeam]] : undefined;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="p-4 max-w-4xl mx-auto">
       {confetti && <Confetti />}
-      <div className="max-w-md mx-auto p-4">
+      <h1 className="text-3xl font-bold text-center mb-4">Birthday Challenge - Phase {phase}</h1>
 
-        <h1 className="text-xl font-semibold mb-2">Team Challenge</h1>
-        <p className="text-sm text-gray-500 mb-4">Phase {phase}</p>
+      {needsArrival ? (
+        <>
+          <p className="text-center text-lg mb-4 font-bold text-red-600">⏱ Phase beendet! Treffpunkt:</p>
+          <Map leaderboard={leaderboard} meeting={phaseMeetingPoints[phase]} player={playerLat && playerLng ? { lat: playerLat, lng: playerLng } : undefined} />
+        </>
+      ) : (
+        <>
+          <p className="text-center mb-4">⏱ {gameActive && timeLeft > 0 ? formatTime(timeLeft) : "Spiel nicht aktiv"}</p>
 
-        <div className="bg-white p-4 rounded-xl mb-4 shadow-sm">
-          <p className="text-sm text-gray-500">Time</p>
-          <p className="text-2xl font-semibold">{gameActive?formatTime(timeLeft):"Waiting"}</p>
-        </div>
+          {!lockedTeam ? (
+            <>
+              <input className="border p-2 w-full mb-2" placeholder="Team Name" value={team} onChange={e=>setTeam(e.target.value)} />
+              <button onClick={lockTeam} className="bg-blue-500 text-white w-full p-2 mb-4">Team speichern</button>
+            </>
+          ) : <p className="text-center mb-4 font-bold">Team: {lockedTeam}</p>}
 
-        {!lockedTeam &&
-          <div className="bg-white p-4 rounded-xl mb-4 shadow-sm">
-            <input className="w-full border p-3 rounded-lg mb-3" placeholder="Team name" value={team} onChange={e=>setTeam(e.target.value)} />
-            <button onClick={lockTeam} className="w-full bg-black text-white p-3 rounded-lg">Join Team</button>
+          {gameActive && timeLeft > 0 && currentTask && (
+            <div className="grid gap-3">
+              <div className="border p-3">
+                {currentTask.text} (+{currentTask.points})
+                <input type="file" onChange={e=>handleUpload(e.target.files?.[0])} disabled={!lockedTeam} />
+              </div>
+            </div>
+          )}
+
+          <div className="h-96 mt-6">
+            <Map leaderboard={leaderboard} />
           </div>
-        }
-
-        {gameActive && currentTask &&
-          <div className="bg-white p-4 rounded-xl mb-4 shadow-sm">
-            <p className="mb-2">{currentTask.text}</p>
-            <p className="text-sm text-gray-500 mb-3">{currentTask.points} points</p>
-            <input type="file" onChange={e=>handleUpload(e.target.files?.[0])} />
-          </div>
-        }
-
-        {!gameActive && needsArrival &&
-          <div className="bg-white p-4 rounded-xl mb-4 shadow-sm">
-            <p className="font-bold mb-2">Meeting Point</p>
-            <Map leaderboard={leaderboard} meeting={phaseMeetingPoints[phase]} player={playerLat&&playerLng?{lat:playerLat,lng:playerLng}:undefined} />
-          </div>
-        }
-
-        <div className="h-72 bg-white rounded-xl shadow-sm overflow-hidden">
-          <Map leaderboard={leaderboard} />
-        </div>
-
-      </div>
+        </>
+      )}
     </div>
   );
 }
 
-// ---------------- UTILS ----------------
+// ---------------- SHUFFLE ----------------
 function shuffleTasks(taskList: Task[]): Task[] {
   const array = [...taskList];
-  for(let i=array.length-1;i>0;i--){
+  for (let i=array.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [array[i],array[j]]=[array[j],array[i]];
   }
