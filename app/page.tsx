@@ -200,7 +200,6 @@ useEffect(() => {
 
   const watchId = navigator.geolocation.watchPosition(
     async (pos) => {
-      alert("📍 Standort erhalten");
 
       setPlayerLat(pos.coords.latitude);
       setPlayerLng(pos.coords.longitude);
@@ -210,7 +209,6 @@ useEffect(() => {
       if (now - lastSent < 5000) return;
       lastSent = now;
 
-      alert("📤 Sende Standort");
 
       const { error } = await supabase
         .from("locations")
@@ -223,15 +221,13 @@ useEffect(() => {
 
       if (error) {
         alert("❌ Supabase Fehler: " + error.message);
-      } else {
-        alert("✅ Standort gesendet");
       }
     },
     (err) => {
       alert("❌ Geolocation Fehler: " + err.message);
     },
     {
-      enableHighAccuracy: false,
+      enableHighAccuracy: true,
       maximumAge: 10000,
       timeout: 20000
     }
