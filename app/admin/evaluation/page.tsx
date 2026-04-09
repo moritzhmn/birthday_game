@@ -107,95 +107,105 @@ export default function EvaluationPage() {
   const sortedRanking = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-4 flex flex-col items-center">
-      <motion.h1
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-4xl font-bold text-center mb-6"
+  <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 flex flex-col items-center">
+  
+    <motion.h1
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-4xl font-bold text-center mb-8"
+    >
+      Auswertung
+    </motion.h1>
+
+    {/* --- Rangliste --- */}
+    {sortedRanking.length > 0 && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="w-full max-w-3xl mb-8 bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-lg"
       >
-        🎯 Auswertung
-      </motion.h1>
+        <h2 className="text-2xl font-semibold mb-4 text-center">Rangliste</h2>
+        <ol className="list-decimal ml-6 space-y-2">
+          {sortedRanking.map(([team, score], idx) => (
+            <li key={idx} className="text-lg">
+              <span className="font-medium">{team}</span>: {score} Punkte
+            </li>
+          ))}
+        </ol>
+      </motion.div>
+    )}
 
-      {/* --- Rangliste --- */}
-      {sortedRanking.length > 0 && (
+    {/* --- Submissions --- */}
+    {submissions.map((sub) => {
+      const task = phaseTasks[sub.phase]?.find((t) => t.id === sub.task);
+      const type = task?.type || "image";
+
+      return (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="w-full max-w-3xl mb-6 bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-lg"
+          key={sub.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="w-full max-w-3xl bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-lg mb-6 flex flex-col"
         >
-          <h2 className="text-2xl font-semibold mb-4 text-center">🏆 Rangliste</h2>
-          <ol className="list-decimal ml-6 space-y-1">
-            {sortedRanking.map(([team, score], idx) => (
-              <li key={idx} className="text-lg">
-                {team}: {score} Punkte
-              </li>
-            ))}
-          </ol>
-        </motion.div>
-      )}
-
-      {/* --- Submissions --- */}
-      {submissions.map((sub) => {
-        const task = phaseTasks[sub.phase]?.find((t) => t.id === sub.task);
-        const type = task?.type || "image";
-
-        return (
-          <motion.div
-            key={sub.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="w-full max-w-3xl bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-lg mb-4"
-          >
-            <p className="font-semibold">
-              Team: {sub.team} | Phase: {sub.phase} | Aufgabe: {task?.text || sub.task} | Punkte:{" "}
-              {task?.points || 0}
+          {/* Task Header */}
+          <div className="mb-4">
+            <p className="font-semibold text-lg">
+              Team: {sub.team} | Phase: {sub.phase} | Aufgabe: {task?.text || sub.task}
             </p>
-
-            {sub.image_url && (
-              <div className="mt-4 flex justify-center">
-                {type === "video" ? (
-                  <video
-                    src={sub.image_url}
-                    controls
-                    className="w-full max-w-2xl max-h-[500px] rounded-xl shadow-md object-contain"
-                  />
-                ) : (
-                  <img
-                    src={sub.image_url}
-                    className="w-full max-w-2xl max-h-[500px] rounded-xl shadow-md object-contain"
-                  />
-                )}
-              </div>
-            )}
-
-            <div className="flex flex-wrap gap-2 mt-4">
-              <button
-                onClick={() => updateBonus(sub.id, (sub.bonus || 0) + 1)}
-                className="flex-1 min-w-[120px] bg-green-500 px-3 py-2 rounded-xl font-semibold hover:bg-green-600 text-center"
-              >
-                +1 Bonus
-              </button>
-              <button
-                onClick={() => updateBonus(sub.id, (sub.bonus || 0) - 1)}
-                className="flex-1 min-w-[120px] bg-red-500 px-3 py-2 rounded-xl font-semibold hover:bg-red-600 text-center"
-              >
-                -1 Punkt
-              </button>
-              <span className="flex-1 min-w-[120px] text-center self-center">
-                Bewertung: {sub.bonus || 0}
-              </span>
-
-              <button
-                onClick={() => saveRating(sub.id)}
-                className="flex-1 min-w-[120px] bg-blue-500 px-3 py-2 rounded-xl font-semibold hover:bg-blue-600 text-center"
-              >
-                ✅ Bewertung bestätigen
-              </button>
+            <div className="inline-block bg-purple-600 text-white px-4 py-1 rounded-full mt-2 text-sm font-semibold">
+              {task?.points || 0} {task?.points === 1 ? "Punkt" : "Punkte"}
             </div>
-          </motion.div>
-        );
-      })}
-    </div>
-  );
+          </div>
+
+          {/* Media */}
+          {sub.image_url && (
+            <div className="mt-4 flex justify-center">
+              {type === "video" ? (
+                <video
+                  src={sub.image_url}
+                  controls
+                  className="w-full max-w-2xl max-h-[500px] rounded-xl shadow-md object-contain"
+                />
+              ) : (
+                <img
+                  src={sub.image_url}
+                  className="w-full max-w-2xl max-h-[500px] rounded-xl shadow-md object-contain"
+                />
+              )}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-wrap gap-3 mt-6">
+            <button
+              onClick={() => updateBonus(sub.id, (sub.bonus || 0) + 1)}
+              className="flex-1 min-w-[140px] bg-green-600 hover:bg-green-700 px-4 py-2 rounded-xl font-semibold transition text-center"
+            >
+              +1 Bonus
+            </button>
+
+            <button
+              onClick={() => updateBonus(sub.id, (sub.bonus || 0) - 1)}
+              className="flex-1 min-w-[140px] bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl font-semibold transition text-center"
+            >
+              -1 Punkt
+            </button>
+
+            <div className="flex-1 min-w-[140px] text-center self-center font-medium">
+              Bewertung: {sub.bonus || 0}
+            </div>
+
+            <button
+              onClick={() => saveRating(sub.id)}
+              className="flex-1 min-w-[140px] bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl font-semibold transition text-center"
+            >
+              Bewertung bestätigen
+            </button>
+          </div>
+        </motion.div>
+      );
+    })}
+  </div>
+);
 }

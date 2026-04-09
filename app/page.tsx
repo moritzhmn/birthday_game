@@ -14,7 +14,7 @@ type Task = { id: number; text: string; points: number; type?: "image" | "video"
 
 const phaseTasks: Record<number, Task[]> = {
   1: [
-    { id: 1, text: "Find a public landmark", points: 1, type: "image" },
+    { id: 1, text: "Renne zur Frauenkiche", points: 1, type: "image" },
     { id: 2, text: "Take a team photo in the park", points: 2, type: "image" },
     { id: 3, text: "Record a short video of your team", points: 1, type: "video" },
     { id: 4, text: "Draw a chalk art on the sidewalk", points: 2, type: "image" },
@@ -213,7 +213,7 @@ export default function Home() {
   }, [tasks]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 flex flex-col items-center relative">
+    <div className="min-h-screen  text-white p-6 flex flex-col items-center relative">
       {confetti && <Confetti />}
 
 
@@ -271,12 +271,12 @@ export default function Home() {
                 className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl w-full flex flex-col items-center"
               >
                 <div className="font-bold text-lg mb-2 text-center">{tasks[currentIndex].text}</div>
-                <div className="bg-purple-600 text-white px-3 py-1 rounded-full mb-4 text-sm font-semibold">
+          
                   <div className="bg-purple-600 text-white px-3 py-1 rounded-full mb-4 text-sm font-semibold">
   {tasks[currentIndex].points}{" "}
   {tasks[currentIndex].points === 1 ? "Punkt" : "Punkte"}
 </div>
-                </div>
+                
 
                 {previewUrls[tasks[currentIndex].id] &&
                   (tasks[currentIndex].type === "video" ? (
