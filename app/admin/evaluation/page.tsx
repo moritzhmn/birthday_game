@@ -29,7 +29,6 @@ type Task = {
   type: "image" | "video";
 };
 
-// Beispiel-Aufgabenmapping
 const phaseTasks: Record<number, Task[]> = {
   1: [
     { id: 1, text: "Find a public landmark", points: 1, type: "image" },
@@ -108,7 +107,7 @@ export default function EvaluationPage() {
   const sortedRanking = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-4 flex flex-col items-center">
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -122,7 +121,7 @@ export default function EvaluationPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="w-full max-w-3xl mb-8 bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-lg"
+          className="w-full max-w-3xl mb-6 bg-white/10 backdrop-blur-lg p-6 rounded-2xl shadow-lg"
         >
           <h2 className="text-2xl font-semibold mb-4 text-center">🏆 Rangliste</h2>
           <ol className="list-decimal ml-6 space-y-1">
@@ -159,35 +158,37 @@ export default function EvaluationPage() {
                   <video
                     src={sub.image_url}
                     controls
-                    className="max-w-full max-h-64 rounded-xl shadow-md object-contain"
+                    className="w-full max-w-2xl max-h-[500px] rounded-xl shadow-md object-contain"
                   />
                 ) : (
                   <img
                     src={sub.image_url}
-                    className="max-w-full max-h-64 rounded-xl shadow-md object-contain"
+                    className="w-full max-w-2xl max-h-[500px] rounded-xl shadow-md object-contain"
                   />
                 )}
               </div>
             )}
 
-            <div className="flex items-center gap-3 mt-4">
+            <div className="flex flex-wrap gap-2 mt-4">
               <button
                 onClick={() => updateBonus(sub.id, (sub.bonus || 0) + 1)}
-                className="bg-green-500 px-3 py-1 rounded-xl font-semibold hover:bg-green-600"
+                className="flex-1 min-w-[120px] bg-green-500 px-3 py-2 rounded-xl font-semibold hover:bg-green-600 text-center"
               >
                 +1 Bonus
               </button>
               <button
                 onClick={() => updateBonus(sub.id, (sub.bonus || 0) - 1)}
-                className="bg-red-500 px-3 py-1 rounded-xl font-semibold hover:bg-red-600"
+                className="flex-1 min-w-[120px] bg-red-500 px-3 py-2 rounded-xl font-semibold hover:bg-red-600 text-center"
               >
                 -1 Punkt
               </button>
-              <span>Bewertung: {sub.bonus || 0}</span>
+              <span className="flex-1 min-w-[120px] text-center self-center">
+                Bewertung: {sub.bonus || 0}
+              </span>
 
               <button
                 onClick={() => saveRating(sub.id)}
-                className="ml-auto bg-blue-500 px-3 py-1 rounded-xl font-semibold hover:bg-blue-600"
+                className="flex-1 min-w-[120px] bg-blue-500 px-3 py-2 rounded-xl font-semibold hover:bg-blue-600 text-center"
               >
                 ✅ Bewertung bestätigen
               </button>
