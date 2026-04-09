@@ -272,7 +272,10 @@ export default function Home() {
               >
                 <div className="font-bold text-lg mb-2 text-center">{tasks[currentIndex].text}</div>
                 <div className="bg-purple-600 text-white px-3 py-1 rounded-full mb-4 text-sm font-semibold">
-                  {tasks[currentIndex].points} Punkte
+                  <div className="bg-purple-600 text-white px-3 py-1 rounded-full mb-4 text-sm font-semibold">
+  {tasks[currentIndex].points}{" "}
+  {tasks[currentIndex].points === 1 ? "Punkt" : "Punkte"}
+</div>
                 </div>
 
                 {previewUrls[tasks[currentIndex].id] &&
