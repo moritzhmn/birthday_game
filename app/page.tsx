@@ -45,6 +45,7 @@ export default function Home() {
   const [phase, setPhase] = useState(1);
   const [timeLeft, setTimeLeft] = useState(0);
   const [gameActive, setGameActive] = useState(false);
+  const [waitingForStart, setWaitingForStart] = useState(false);
   const [confetti, setConfetti] = useState(false);
   const [completedTasks, setCompletedTasks] = useState<number[]>([]);
   const [previewUrls, setPreviewUrls] = useState<Record<number, string>>({});
@@ -96,7 +97,6 @@ export default function Home() {
     const { data, error } = await supabase
       .from("game_state")
       .select("id,is_active,started_at,duration_sec,phase")
-      .eq("is_active", true)
       .order("started_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -104,10 +104,12 @@ export default function Home() {
     if (error || !data || !data.is_active || !data.started_at) {
       setGameActive(false);
       setTimeLeft(0);
+      setWaitingForStart(true); // Warten auf Spielstart
       return;
     }
 
     setPhase(data.phase);
+    setWaitingForStart(false);
 
     const elapsed = Math.floor((Date.now() - new Date(data.started_at).getTime()) / 1000);
     const remaining = Math.max(data.duration_sec - elapsed, 0);
@@ -211,8 +213,32 @@ export default function Home() {
   }, [tasks]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 flex flex-col items-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 flex flex-col items-center relative">
       {confetti && <Confetti />}
+
+      {/* --- Reset Local Storage Button --- */}
+      <button
+        onClick={() => {
+          let confirmCount = 0;
+          const stepConfirm = () => {
+            if (confirm("Willst du wirklich den Local Storage löschen?")) {
+              confirmCount++;
+              if (confirmCount < 3) {
+                alert(`Noch ${3 - confirmCount} Bestätigungen erforderlich!`);
+                stepConfirm();
+              } else {
+                localStorage.clear();
+                alert("Local Storage wurde zurückgesetzt!");
+                window.location.reload();
+              }
+            }
+          };
+          stepConfirm();
+        }}
+        className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700 transition"
+      >
+        Reset Local Storage
+      </button>
 
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
@@ -221,53 +247,6 @@ export default function Home() {
       >
         Birthday Challenge
       </motion.h1>
-
-      {lockedTeam && (
-  <div className="text-center mb-6">
-    {timeLeft > 0 ? (
-      <>
-        <div className="text-5xl font-mono font-bold">{formatTime(timeLeft)}</div>
-        <div className="text-sm opacity-70">
-          Team {lockedTeam} • Phase {phase}
-        </div>
-      </>
-    ) : (
-      // Karte immer anzeigen, wenn Timer abgelaufen
-      phaseMeetingPoints[phase] && (
-        <div className= "max-w-md w-full bg-gradient-to-r from-purple-600 to-pink-500 p-6 rounded-2xl shadow-2xl text-white flex flex-col items-center mt-4 animate-fadeIn">
-          <p className="flex items-center gap-2 text-xl font-bold mb-2">
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="text-yellow-300"
-  >
-    <path d="M12 21C12 21 7 14 7 10C7 7.79086 8.79086 6 11 6C13.2091 6 15 7.79086 15 10C15 14 12 21 12 21Z" />
-    <circle cx="12" cy="10" r="2" />
-  </svg>
-  Treffpunkt
-</p>
-          <a
-            href={phaseMeetingPoints[phase].url}
-            target="_blank"
-            className="text-white text-lg font-semibold underline hover:text-yellow-300 transition-colors"
-          >
-            {phaseMeetingPoints[phase].name}
-          </a>
-          <p className="mt-2 text-sm opacity-80 text-center">
-            Gehe zum Treffpunkt, sobald der Timer abgelaufen ist.
-          </p>
-        </div>
-      )
-    )}
-  </div>
-)}
 
       {!lockedTeam && (
         <motion.div
@@ -290,8 +269,21 @@ export default function Home() {
         </motion.div>
       )}
 
-      {timeLeft >  0 && (
+      {lockedTeam && waitingForStart && (
+        <div className="text-center mt-8 p-6 max-w-md w-full bg-white/10 backdrop-blur-lg rounded-2xl animate-fadeIn">
+          <p className="text-xl font-semibold mb-2">Warte auf Spielstart...</p>
+          <p className="text-sm opacity-70">
+            Das Spiel wird gestartet, sobald der Host es aktiviert. Bitte bleib auf dieser Seite.
+          </p>
+        </div>
+      )}
+
+      {lockedTeam && timeLeft > 0 && !waitingForStart && (
         <div className="relative w-full max-w-md mt-6 flex flex-col items-center">
+          {/* --- Timer & Tasks --- */}
+          <div className="text-5xl font-mono font-bold">{formatTime(timeLeft)}</div>
+          <div className="text-sm opacity-70 mb-4">Team {lockedTeam} • Phase {phase}</div>
+
           {tasks[currentIndex] ? (
             <>
               <motion.div
@@ -375,8 +367,43 @@ export default function Home() {
               </div>
             </>
           ) : (
-            <p className="text-center text-white text-lg mt-6">Alle Aufgaben erledigt! Trink dir ruhig schonmal einen rein und warte bis der Timer abgelaufen ist. Dann gehts weiter odia!</p>
+            <p className="text-center text-white text-lg mt-6">
+              Alle Aufgaben erledigt! Trink dir ruhig schonmal einen rein und warte bis der Timer abgelaufen ist. Dann gehts weiter odia!
+            </p>
           )}
+        </div>
+      )}
+
+      {lockedTeam && !gameActive && !waitingForStart && phaseMeetingPoints[phase] && (
+        <div className="max-w-md w-full bg-gradient-to-r from-purple-600 to-pink-500 p-6 rounded-2xl shadow-2xl text-white flex flex-col items-center mt-4 animate-fadeIn">
+          <p className="flex items-center gap-2 text-xl font-bold mb-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-yellow-300"
+            >
+              <path d="M12 21C12 21 7 14 7 10C7 7.79086 8.79086 6 11 6C13.2091 6 15 7.79086 15 10C15 14 12 21 12 21Z" />
+              <circle cx="12" cy="10" r="2" />
+            </svg>
+            Treffpunkt
+          </p>
+          <a
+            href={phaseMeetingPoints[phase].url}
+            target="_blank"
+            className="text-white text-lg font-semibold underline hover:text-yellow-300 transition-colors"
+          >
+            {phaseMeetingPoints[phase].name}
+          </a>
+          <p className="mt-2 text-sm opacity-80 text-center">
+            Gehe zum Treffpunkt, sobald der Timer abgelaufen ist.
+          </p>
         </div>
       )}
     </div>
