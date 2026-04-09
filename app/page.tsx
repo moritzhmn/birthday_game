@@ -216,29 +216,6 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-6 flex flex-col items-center relative">
       {confetti && <Confetti />}
 
-      {/* --- Reset Local Storage Button --- */}
-      <button
-        onClick={() => {
-          let confirmCount = 0;
-          const stepConfirm = () => {
-            if (confirm("Willst du wirklich den Local Storage löschen?")) {
-              confirmCount++;
-              if (confirmCount < 3) {
-                alert(`Noch ${3 - confirmCount} Bestätigungen erforderlich!`);
-                stepConfirm();
-              } else {
-                localStorage.clear();
-                alert("Local Storage wurde zurückgesetzt!");
-                window.location.reload();
-              }
-            }
-          };
-          stepConfirm();
-        }}
-        className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700 transition"
-      >
-        Reset Local Storage
-      </button>
 
       <motion.h1
         initial={{ opacity: 0, y: -20 }}
@@ -406,6 +383,32 @@ export default function Home() {
           </p>
         </div>
       )}
+          {/* --- Reset Local Storage Button unten klein --- */}
+<div className="w-full flex justify-center mt-8">
+  <button
+    onClick={() => {
+      let confirmCount = 0;
+      const stepConfirm = () => {
+        if (confirm("Willst du wirklich den Local Storage löschen?")) {
+          confirmCount++;
+          if (confirmCount < 3) {
+            alert(`Noch ${3 - confirmCount} Bestätigungen erforderlich!`);
+            stepConfirm();
+          } else {
+            localStorage.clear();
+            alert("Local Storage wurde zurückgesetzt!");
+            window.location.reload();
+          }
+        }
+      };
+      stepConfirm();
+    }}
+    className="bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700 transition"
+  >
+    Reset Local Storage
+  </button>
+</div>
     </div>
+
   );
 }
