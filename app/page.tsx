@@ -14,29 +14,47 @@ type Task = { id: number; text: string; points: number; type?: "image" | "video"
 
 const phaseTasks: Record<number, Task[]> = {
   1: [
-    { id: 1, text: "Renne zur Frauenkiche", points: 1, type: "image" },
-    { id: 2, text: "Take a team photo in the park", points: 2, type: "image" },
-    { id: 3, text: "Record a short video of your team", points: 1, type: "video" },
-    { id: 4, text: "Draw a chalk art on the sidewalk", points: 2, type: "image" },
-    { id: 5, text: "Collect 3 different leaves", points: 1, type: "image" },
-  ],
+
+  { id: 2, text: "Witziges Gruppenfoto an einer Sehnswürdigkeit", points: 2, type: "image" },
+
+  { id: 3, text: "Geburstagslied singen mit mindestens einer fremden Perosn", points: 4, type: "video" },
+
+  { id: 4, text: "Chalk Art am Boden erstellen", points: 2, type: "image" },
+
+  { id: 5, text: "Sammelt 3 verschiedene Blätter und präsentiert sie mit Erklärung", points: 3, type: "video" },
+
+
+  // 🐻 PEINLICHKEITS-LEVEL BEGINNT
+
+  { id: 6, text: "Fürstenzug: Ein Teammitglied bellt und läuft wie ein Wachhund", points: 5, type: "video" },
+
+  { id: 7, text: "Brühlsche Terrasse: 10 Sekunden peinlich tanzen", points: 3, type: "video" },
+
+  { id: 8, text: "Augustusbrücke: Team schreit 'DER BÄR IST LOS!'", points: 3, type: "video" },
+
+  { id: 9, text: "Frauenkirche: Fremde sollen 'Happy Birthday Bär' sagen", points: 4, type: "video" },
+
+  { id: 10, text: "Zwinger: 2 Minuten als Statue komplett regungslos stehen", points: 4, type: "image" },
+
+  { id: 11, text: "Residenzschloss: Tourist spielen und nach dem 'Schnitzel des Bären' fragen", points: 5, type: "video" },
+
+  { id: 12, text: "Neumarkt: Emotionales Gruppenfoto (jede Person andere Emotion)", points: 2, type: "image" },
+
+  { id: 13, text: "Semperoper: Geburtstagslied in 3 krassen Styles (Oper/Rap/Horror)", points: 5, type: "video" },
+
+  { id: 14, text: "Finale: Mini-Filmszene 'Der Bär findet sein Schnitzel in Dresden'", points: 5, type: "video" }
+],
   2: [
     { id: 11, text: "Find a bar or café", points: 1, type: "image" },
     { id: 12, text: "Order a drink together and toast", points: 2, type: "image" },
     { id: 15, text: "Sing a short song together", points: 3, type: "video" },
     { id: 17, text: "Find a colorful mural and take a photo", points: 2, type: "image" },
   ],
-  3: [
-    { id: 24, text: "Make a short funny video skit", points: 3, type: "video" },
-    { id: 25, text: "Draw a team logo in chalk", points: 1, type: "image" },
-    { id: 29, text: "Record a short thank-you message", points: 1, type: "video" },
-  ],
 };
 
 const phaseMeetingPoints: Record<number, { name: string; url: string }> = {
-  1: { name: "Stadtpark Hamburg", url: "https://goo.gl/maps/xyz1" },
-  2: { name: "Marktplatz Hamburg", url: "https://goo.gl/maps/xyz2" },
-  3: { name: "Hafen Hamburg", url: "https://goo.gl/maps/xyz3" },
+  1: { name: "", url: "https://maps.app.goo.gl/Vz81YiHdVWwLXryYA" },
+  2: { name: "", url: "https://maps.app.goo.gl/DwtD5h2z7r1zEjra6" },
 };
 
 export default function Home() {
@@ -213,205 +231,284 @@ export default function Home() {
   }, [tasks]);
 
   return (
-    <div className="min-h-screen  text-white p-6 flex flex-col items-center relative">
-      {confetti && <Confetti />}
+  <div className="min-h-screen text-white p-6 flex flex-col items-center relative bg-linear-to-br from-slate-950 via-indigo-950 to-slate-900">
+    {confetti && <Confetti />}
 
+    {/* Title */}
+    <motion.h1
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="text-4xl font-bold text-center mb-6 bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+    >
+      Tiroler Geburtstagsbär auf Schnitzeljagd
+    </motion.h1>
 
-      <motion.h1
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-4xl font-bold text-center mb-6"
+    {/* Join */}
+    {!lockedTeam && (
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="max-w-md mx-auto bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl p-6 rounded-2xl"
       >
-        Birthday Challenge
-      </motion.h1>
+        <input
+          className="w-full p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xl mb-4"
+          placeholder="Team Name"
+          value={team}
+          onChange={(e) => setTeam(e.target.value)}
+        />
 
-      {!lockedTeam && (
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="max-w-md mx-auto bg-white/10 backdrop-blur-lg p-6 rounded-2xl"
+        <button
+          onClick={lockTeam}
+          className="w-full bg-linear-to-rrom-indigo-500 via-purple-500 to-pink-500 p-3 rounded-xl font-semibold hover:brightness-110 transition"
         >
-          <input
-            className="w-full p-3 rounded-xl bg-white/20 border border-white/20 mb-4"
-            placeholder="Team Name"
-            value={team}
-            onChange={(e) => setTeam(e.target.value)}
-          />
-          <button
-            onClick={lockTeam}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 p-3 rounded-xl font-semibold"
-          >
-            Join Game
-          </button>
-        </motion.div>
-      )}
+          Beitreten
+        </button>
+      </motion.div>
+    )}
 
-      {lockedTeam && waitingForStart && (
-        <div className="text-center mt-8 p-6 max-w-md w-full bg-white/10 backdrop-blur-lg rounded-2xl animate-fadeIn">
-          <p className="text-xl font-semibold mb-2">Warte auf Spielstart...</p>
-          <p className="text-sm opacity-70">
-            Das Spiel wird gestartet, sobald der Host es aktiviert. Bitte bleib auf dieser Seite.
-          </p>
+    {/* Waiting */}
+    {lockedTeam && waitingForStart && (
+      <div className="text-center mt-8 p-6 max-w-md w-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl animate-fadeIn">
+        <p className="text-xl font-semibold mb-2">
+          Warte auf Spielstart...
+        </p>
+        <p className="text-sm opacity-70">
+          Das Spiel wird gestartet, sobald der Host es aktiviert.
+        </p>
+      </div>
+    )}
+
+    {lockedTeam && !waitingForStart && timeLeft === 0 && (
+  <>
+    <div className="text-5xl font-mono font-bold bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+      {formatTime(timeLeft)}
+    </div>
+
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="w-full max-w-md mt-10 bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl p-6 rounded-2xl text-center"
+    >
+      <h2 className="text-2xl font-bold mb-3 bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+        Zeit abgelaufen
+      </h2>
+
+      <p className="text-white/70 mb-4">
+        Komm so schnell es geht hier in:
+      </p>
+
+      <a
+        href={phaseMeetingPoints[phase]?.url}
+        target="_blank"
+        className="inline-block bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 px-5 py-2 rounded-xl font-semibold hover:brightness-110 transition"
+      >
+        Route öffnen
+      </a>
+    </motion.div>
+  </>
+)}
+
+    {/* Game */}
+    {lockedTeam && timeLeft > 0 && !waitingForStart && (
+      <div className="relative w-full max-w-md mt-6 flex flex-col items-center">
+
+        {/* Timer */}
+        <div className="text-5xl font-mono font-bold bg-linear-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          {formatTime(timeLeft)}
         </div>
-      )}
 
-      {lockedTeam && timeLeft > 0 && !waitingForStart && (
-        <div className="relative w-full max-w-md mt-6 flex flex-col items-center">
-          {/* --- Timer & Tasks --- */}
-          <div className="text-5xl font-mono font-bold">{formatTime(timeLeft)}</div>
-          <div className="text-sm opacity-70 mb-4">Team {lockedTeam} • Phase {phase}</div>
+        <div className="text-sm opacity-70 mb-4">
+          Team {lockedTeam} • Phase {phase}
+        </div>
+        
 
-          {tasks[currentIndex] ? (
-            <>
-              <motion.div
-                key={tasks[currentIndex].id}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                className="bg-white/10 backdrop-blur-lg p-6 rounded-2xl w-full flex flex-col items-center"
-              >
-                <div className="font-bold text-lg mb-2 text-center">{tasks[currentIndex].text}</div>
-          
-                  <div className="bg-purple-600 text-white px-3 py-1 rounded-full mb-4 text-sm font-semibold">
-  {tasks[currentIndex].points}{" "}
-  {tasks[currentIndex].points === 1 ? "Punkt" : "Punkte"}
-</div>
-                
+        {tasks.length > 0 ? (
+          <>
+            {/* Carousel */}
+            <div className="relative w-full min-h-90 flex items-center justify-center overflow-hidden">
 
-                {previewUrls[tasks[currentIndex].id] &&
-                  (tasks[currentIndex].type === "video" ? (
-                    <video
-                      src={previewUrls[tasks[currentIndex].id]}
-                      controls
-                      className="rounded-xl border border-white/20 mb-4"
-                    />
-                  ) : (
-                    <img
-                      src={previewUrls[tasks[currentIndex].id]}
-                      className="rounded-xl border border-white/20 mb-4"
-                    />
-                  ))}
+              {tasks.map((task, index) => {
+                const offset = index - currentIndex;
+                const isActive = offset === 0;
 
-                <label className="w-full py-2 px-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-center cursor-pointer font-semibold hover:brightness-110 transition">
-                  {tasks[currentIndex].type === "video" ? "Video hochladen" : "Bild hochladen"}
-                  <input
-                    type="file"
-                    accept={tasks[currentIndex].type === "video" ? "video/*" : "image/*"}
-                    className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files) upload(e.target.files[0], tasks[currentIndex]);
+                const isMobile =
+                  typeof window !== "undefined" &&
+                  window.innerWidth < 500;
+
+                return (
+                  <motion.div
+                    key={task.id}
+                    animate={{
+                      x: offset * (isMobile ? 140 : 260),
+                      scale: isActive ? 1 : isMobile ? 0.94 : 0.9,
+                      opacity:
+                        Math.abs(offset) > 1
+                          ? 0
+                          : isActive
+                          ? 1
+                          : 0.55,
+                      zIndex: isActive ? 10 : 0
                     }}
-                  />
-                </label>
-              </motion.div>
-
-              {uploadProgress[tasks[currentIndex].id] > 0 && (
-                <div className="w-full bg-white/20 rounded-full h-2 mt-2 overflow-hidden">
-                  <div
-                    className="bg-green-500 h-2"
-                    style={{ width: `${uploadProgress[tasks[currentIndex].id]}%` }}
-                  />
-                </div>
-              )}
-
-              {tasks.length > 1 && (
-                <div className="flex justify-between w-full mt-4">
-                  <button
-                    onClick={() =>
-                      setCurrentIndex((prev) => (prev > 0 ? prev - 1 : tasks.length - 1))
-                    }
-                    className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl font-semibold transition"
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 30
+                    }}
+                    className="absolute w-[85%] max-w-sm bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl p-6 rounded-2xl flex flex-col items-center"
                   >
-                    ← Zurück
-                  </button>
-                  <button
-                    onClick={() =>
-                      setCurrentIndex((prev) => (prev < tasks.length - 1 ? prev + 1 : 0))
-                    }
-                    className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl font-semibold transition"
-                  >
-                    Nächste →
-                  </button>
-                </div>
-              )}
+                    <div className="font-bold text-lg mb-2 text-center">
+                      {task.text}
+                    </div>
 
-              <div className="flex space-x-2 mt-3">
-                {tasks.map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={`w-3 h-3 rounded-full ${
-                      currentIndex === idx ? "bg-white" : "bg-white/30"
-                    }`}
-                  />
-                ))}
+                    {/* Points */}
+                    <div className="bg-linear-to-rrom-indigo-500 to-purple-500 px-3 py-1 rounded-full mb-4 text-sm font-semibold">
+                      {task.points}{" "}
+                      {task.points === 1
+                        ? "Punkt"
+                        : "Punkte"}
+                    </div>
+
+                    {/* Preview */}
+                    {previewUrls[task.id] &&
+                      (task.type === "video" ? (
+                        <video
+                          src={previewUrls[task.id]}
+                          controls
+                          className="rounded-xl border border-white/10 mb-4"
+                        />
+                      ) : (
+                        <img
+                          src={previewUrls[task.id]}
+                          className="rounded-xl border border-white/10 mb-4"
+                        />
+                      ))}
+                      
+
+                    {/* Upload */}
+                    <label className="w-full py-2 px-4 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl text-center cursor-pointer font-semibold hover:brightness-110 transition">
+                      {task.type === "video"
+                        ? "Video hochladen"
+                        : "Bild hochladen"}
+
+                      <input
+                        type="file"
+                        accept={
+                          task.type === "video"
+                            ? "video/*"
+                            : "image/*"
+                        }
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files)
+                            upload(
+                              e.target.files[0],
+                              task
+                            );
+                        }}
+                      />
+                    </label>
+
+                    {/* Progress */}
+                    {uploadProgress[task.id] > 0 && (
+                      <div className="w-full bg-white/10 rounded-full h-2 mt-2 overflow-hidden">
+                        <div
+                          className="bg-linear-to-r from-emerald-400 to-teal-400 h-2"
+                          style={{
+                            width: `${uploadProgress[task.id]}%`
+                          }}
+                        />
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Navigation */}
+            {tasks.length > 1 && (
+              <div className="flex justify-between w-full mt-4">
+                <button
+                  onClick={() =>
+                    setCurrentIndex((prev) =>
+                      prev > 0
+                        ? prev - 1
+                        : tasks.length - 1
+                    )
+                  }
+                  className="bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-xl px-4 py-2 rounded-xl font-semibold transition"
+                >
+                  ← Zurück
+                </button>
+
+                <button
+                  onClick={() =>
+                    setCurrentIndex((prev) =>
+                      prev < tasks.length - 1
+                        ? prev + 1
+                        : 0
+                    )
+                  }
+                  className="bg-white/5 hover:bg-white/10 border border-white/10 backdrop-blur-xl px-4 py-2 rounded-xl font-semibold transition"
+                >
+                  Nächste →
+                </button>
               </div>
-            </>
-          ) : (
-            <p className="text-center text-white text-lg mt-6">
-              Alle Aufgaben erledigt! Trink dir ruhig schonmal einen rein und warte bis der Timer abgelaufen ist. Dann gehts weiter odia!
-            </p>
-          )}
-        </div>
-      )}
+            )}
 
-      {lockedTeam && !gameActive && !waitingForStart && phaseMeetingPoints[phase] && (
-        <div className="max-w-md w-full bg-gradient-to-r from-purple-600 to-pink-500 p-6 rounded-2xl shadow-2xl text-white flex flex-col items-center mt-4 animate-fadeIn">
-          <p className="flex items-center gap-2 text-xl font-bold mb-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-yellow-300"
-            >
-              <path d="M12 21C12 21 7 14 7 10C7 7.79086 8.79086 6 11 6C13.2091 6 15 7.79086 15 10C15 14 12 21 12 21Z" />
-              <circle cx="12" cy="10" r="2" />
-            </svg>
-            Treffpunkt
+            {/* Dots */}
+            <div className="flex space-x-2 mt-3">
+              {tasks.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`w-3 h-3 rounded-full transition ${
+                    currentIndex === idx
+                      ? "bg-linear-to-r from-indigo-400 to-pink-400"
+                      : "bg-white/20"
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <p className="text-center text-white text-lg mt-6">
+            Alle Aufgaben erledigt! Trink dir ruhig
+            schonmal einen rein 🍻
           </p>
-          <a
-            href={phaseMeetingPoints[phase].url}
-            target="_blank"
-            className="text-white text-lg font-semibold underline hover:text-yellow-300 transition-colors"
-          >
-            {phaseMeetingPoints[phase].name}
-          </a>
-          <p className="mt-2 text-sm opacity-80 text-center">
-            Gehe zum Treffpunkt, sobald der Timer abgelaufen ist.
-          </p>
-        </div>
-      )}
-          {/* --- Reset Local Storage Button unten klein --- */}
-<div className="w-full flex justify-center mt-8">
+        )}
+      </div>
+    )}
+
+    {/* Reset */}
+   {/* Reset */}
+<div className="w-full flex justify-center mt-8 opacity-60 hover:opacity-100 transition">
   <button
     onClick={() => {
       let confirmCount = 0;
+
       const stepConfirm = () => {
-        if (confirm("Willst du wirklich den Local Storage löschen?")) {
+        if (
+          confirm("Willst du wirklich den Local Storage löschen?")
+        ) {
           confirmCount++;
+
           if (confirmCount < 3) {
-            alert(`Noch ${3 - confirmCount} Bestätigungen erforderlich!`);
+            alert(`${3 - confirmCount}x noch bestätigen`);
             stepConfirm();
           } else {
             localStorage.clear();
-            alert("Local Storage wurde zurückgesetzt!");
+            alert("Zurückgesetzt!");
             window.location.reload();
           }
         }
       };
+
       stepConfirm();
     }}
-    className="bg-red-600 text-white text-xs px-2 py-1 rounded hover:bg-red-700 transition"
+    className="text-[10px] text-white/50 hover:text-white/80 transition "
   >
     Reset Local Storage
   </button>
 </div>
-    </div>
-
-  );
+  </div>
+);
 }
