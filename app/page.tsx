@@ -14,41 +14,51 @@ type Task = { id: number; text: string; points: number; type?: "image" | "video"
 
 const phaseTasks: Record<number, Task[]> = {
   1: [
+    // 🏰 ALTSTADT
 
-  { id: 2, text: "Witziges Gruppenfoto an einer Sehnswürdigkeit", points: 2, type: "image" },
+    { id: 1, text: "Singt ein Geburtstagslied für mich zusammen mit mindestens zwei fremden Personen", points: 5, type: "video" },
 
-  { id: 3, text: "Geburstagslied singen mit mindestens einer fremden Perosn", points: 4, type: "video" },
+    { id: 2, text: "Fürstenzug: Macht ein süßes Gruppen-Selfie hintereinander in einer Reihe", points: 1, type: "image" },
 
-  { id: 4, text: "Chalk Art am Boden erstellen", points: 2, type: "image" },
+    { id: 3, text: "Tanzt mindestens 10 Sekunden zu einem Straßenmusiker", points: 5, type: "video" },
 
-  { id: 5, text: "Sammelt 3 verschiedene Blätter und präsentiert sie mit Erklärung", points: 3, type: "video" },
+    { id: 4, text: "Stellt einen lauten Streit nach, weil ihr zu unterschiedlichen Sehenswürdigkeiten wollt", points: 3, type: "video" },
 
+    { id: 5, text: "Macht ein Foto von einem frisch gezapften Bier", points: 1, type: "image" },
 
-  // 🐻 PEINLICHKEITS-LEVEL BEGINNT
+    { id: 6, text: "Fragt eine fremde Person nach dem Weg zum 'Schnitzelmuseum Dresden'", points: 5, type: "video" },
 
-  { id: 6, text: "Fürstenzug: Ein Teammitglied bellt und läuft wie ein Wachhund", points: 5, type: "video" },
+    { id: 7, text: "Macht ein Foto von der 'Dicken' (große Straßenbahn)", points: 1, type: "image" },
 
-  { id: 7, text: "Brühlsche Terrasse: 10 Sekunden peinlich tanzen", points: 3, type: "video" },
+    { id: 8, text: "Bestellt an einer Bar ein Bier und trinkt es schnell (Beweisfoto)", points: 5, type: "image" },
 
-  { id: 8, text: "Augustusbrücke: Team schreit 'DER BÄR IST LOS!'", points: 3, type: "video" },
+    { id: 9, text: "Altmarkt: Dreht ein übertriebenes Influencer-Reisevideo", points: 3, type: "video" },
 
-  { id: 9, text: "Frauenkirche: Fremde sollen 'Happy Birthday Bär' sagen", points: 4, type: "video" },
+    { id: 10, text: "Macht ein Selfie mit mindestens einer fremden Person", points: 2, type: "image" }
+  ],
 
-  { id: 10, text: "Zwinger: 2 Minuten als Statue komplett regungslos stehen", points: 4, type: "image" },
-
-  { id: 11, text: "Residenzschloss: Tourist spielen und nach dem 'Schnitzel des Bären' fragen", points: 5, type: "video" },
-
-  { id: 12, text: "Neumarkt: Emotionales Gruppenfoto (jede Person andere Emotion)", points: 2, type: "image" },
-
-  { id: 13, text: "Semperoper: Geburtstagslied in 3 krassen Styles (Oper/Rap/Horror)", points: 5, type: "video" },
-
-  { id: 14, text: "Finale: Mini-Filmszene 'Der Bär findet sein Schnitzel in Dresden'", points: 5, type: "video" }
-],
   2: [
-    { id: 11, text: "Find a bar or café", points: 1, type: "image" },
-    { id: 12, text: "Order a drink together and toast", points: 2, type: "image" },
-    { id: 15, text: "Sing a short song together", points: 3, type: "video" },
-    { id: 17, text: "Find a colorful mural and take a photo", points: 2, type: "image" },
+    // 🎨 NEUSTADT
+
+    { id: 11, text: "Kunsthofpassage: Findet das verrückteste Kunstwerk und macht ein Foto", points: 3, type: "image" },
+
+    { id: 12, text: "Alaunpark: Versucht gemeinsam einen Handstand", points: 2, type: "video" },
+
+    { id: 13, text: "Interview: Fragt eine fremde Person 'Wie viel ist dein Outfit wert?'", points: 5, type: "video" },
+
+    { id: 14, text: "Singt an einer belebten Ecke einen Song wie Straßenmusiker", points: 5, type: "video" },
+
+    { id: 15, text: "Macht ein Selfie mit einem fremden Hund", points: 5, type: "image" },
+
+    { id: 16, text: "Findet das bunteste Haus in der Neustadt", points: 1, type: "image" },
+
+    { id: 17, text: "Findet ein SGD-Graffiti oder Sticker", points: 1, type: "image" },
+
+    { id: 18, text: "Setzt euch zu einer fremden Gruppe und unterhaltet euch (Beweisvideo)", points: 5, type: "video" },
+
+    { id: 19, text: "Findet einen 'The Länd'-Sticker", points: 2, type: "image" },
+
+    { id: 20, text: "Trinkt in einer Bar schnell einen Shot (Beweisfoto)", points: 5, type: "image" }
   ],
 };
 
@@ -259,7 +269,7 @@ export default function Home() {
 
         <button
           onClick={lockTeam}
-          className="w-full bg-linear-to-rrom-indigo-500 via-purple-500 to-pink-500 p-3 rounded-xl font-semibold hover:brightness-110 transition"
+          className="w-full py-2 px-4 bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl text-center cursor-pointer font-semibold hover:brightness-110 transition"
         >
           Beitreten
         </button>
