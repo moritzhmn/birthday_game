@@ -129,7 +129,7 @@ export default function EvaluationPage() {
   };
 
   return (
-    <div className="min-h-screen text-white p-6 flex flex-col items-center bg-linear-to-br from-slate-950 via-indigo-950 to-slate-900">
+    <div className="min-h-dvh text-white p-6 flex flex-col items-center relative bg-linear-to-b from-[#0b1337] via-[#0f172a] to-[#0b1337]">
 
       {/* TITLE (wie Game) */}
       <motion.h1
