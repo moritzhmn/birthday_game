@@ -317,7 +317,7 @@ export default function Home() {
           {formatTime(timeLeft)}
         </div>
 
-        <div className="text-sm opacity-70 mb-4">
+        <div className="text-sm opacity-70 mb-2">
           Team {lockedTeam} • Phase {phase}
         </div>
         
@@ -325,7 +325,7 @@ export default function Home() {
         {tasks.length > 0 ? (
           <>
             {/* Carousel */}
-            <div className="relative w-full min-h-90 flex items-center justify-center overflow-hidden">
+            <div className="relative w-full min-h-75 flex items-center justify-center overflow-hidden">
 
               {tasks.map((task, index) => {
                 const offset = index - currentIndex;
