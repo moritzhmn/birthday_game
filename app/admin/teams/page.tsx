@@ -14,19 +14,19 @@ type TeamData = {
 const teams: Record<Team, TeamData> = {
   1: {
     name: "Tiroler Göstl",
-    players: ["Paul", "Lara", "Horst"],
+    players: ["Hoffe", "Lara", "Ole"],
   },
   2: {
-    name: "Blitze",
-    players: ["Spieler 2", "Spieler 6", "Spieler 10"],
+    name: "Kaspressknödl",
+    players: ["Hannah", "Antonia", "Lia"],
   },
   3: {
-    name: "Phönix",
-    players: ["Spieler 3", "Spieler 7", "Spieler 11"],
+    name: "Gulaschsuppn",
+    players: ["Paul", "Moritz", "Odschi"],
   },
   4: {
-    name: "Titanen",
-    players: ["Spieler 4", "Spieler 8", "Spieler 12"],
+    name: "Wiener Schnitzel",
+    players: ["Philipp", "Rike", "Paula"],
   },
 };
 
@@ -234,7 +234,7 @@ export default function CasinoTeams() {
             </h2>
 
             <p className="text-white/60 text-sm">
-              QR-Code scannen und Teamnamen erstellen
+              QR-Code scannen und durchbrennen
             </p>
           </div>
 

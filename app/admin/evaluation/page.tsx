@@ -33,15 +33,152 @@ type Task = {
 
 const phaseTasks: Record<number, Task[]> = {
   1: [
-    { id: 1, text: "Renne zur Frauenkirche", points: 1, type: "image" },
-    { id: 2, text: "Teamfoto machen", points: 2, type: "image" },
-    { id: 3, text: "Kurzes Video aufnehmen", points: 1, type: "video" },
+    // 🏰 ALTSTADT
+
+    {
+      id: 1,
+      text: "Singt ein Geburtstagslied für mich zusammen mit mindestens zwei fremden Personen",
+      points: 5,
+      type: "video",
+    },
+
+    {
+      id: 2,
+      text: "Fürstenzug: Macht ein süßes Gruppen-Selfie hintereinander in einer Reihe",
+      points: 1,
+      type: "image",
+    },
+
+    {
+      id: 3,
+      text: "Tanzt mindestens 10 Sekunden zu einem Straßenmusiker",
+      points: 5,
+      type: "video",
+    },
+
+    {
+      id: 4,
+      text: "Stellt einen lauten Streit nach, weil ihr zu unterschiedlichen Sehenswürdigkeiten wollt",
+      points: 3,
+      type: "video",
+    },
+
+    {
+      id: 5,
+      text: "Macht ein Foto von einem frisch gezapften Bier",
+      points: 1,
+      type: "image",
+    },
+
+    {
+      id: 6,
+      text: "Fragt eine fremde Person nach dem Weg zum 'Schnitzelmuseum Dresden'",
+      points: 5,
+      type: "video",
+    },
+
+    {
+      id: 7,
+      text: "Macht ein Foto von der 'Dicken' (große Straßenbahn)",
+      points: 1,
+      type: "image",
+    },
+
+    {
+      id: 8,
+      text: "Bestellt an einer Bar ein Bier und trinkt es schnell (Beweisfoto)",
+      points: 5,
+      type: "image",
+    },
+
+    {
+      id: 9,
+      text: "Altmarkt: Dreht ein übertriebenes Influencer-Reisevideo",
+      points: 1,
+      type: "video",
+    },
+
+    {
+      id: 10,
+      text: "Macht ein Selfie mit mindestens einer fremden Person",
+      points: 3,
+      type: "image",
+    },
   ],
+
   2: [
-    { id: 11, text: "Café Aufgabe", points: 1, type: "image" },
-    { id: 15, text: "Gemeinsam singen", points: 3, type: "video" },
+    // 🎨 NEUSTADT
+
+    {
+      id: 11,
+      text: "Kunsthofpassage: Findet die verrückteste Street-Art und macht ein Foto",
+      points: 1,
+      type: "image",
+    },
+
+    {
+      id: 12,
+      text: "Alaunpark: Versucht gemeinsam einen Handstand",
+      points: 3,
+      type: "video",
+    },
+
+    {
+      id: 13,
+      text: "Interview: Fragt eine fremde Person 'Wie viel ist dein Outfit wert?'",
+      points: 5,
+      type: "video",
+    },
+
+    {
+      id: 14,
+      text: "Singt an einer belebten Ecke einen Song wie Straßenmusiker",
+      points: 5,
+      type: "video",
+    },
+
+    {
+      id: 15,
+      text: "Macht ein Selfie mit einem fremden Hund (vorher fragen!)",
+      points: 3,
+      type: "image",
+    },
+
+    {
+      id: 16,
+      text: "Findet das bunteste Haus in der Neustadt",
+      points: 1,
+      type: "image",
+    },
+
+    {
+      id: 17,
+      text: "Findet ein SGD-Graffiti oder Sticker",
+      points: 1,
+      type: "image",
+    },
+
+    {
+      id: 18,
+      text: "Setzt euch zu einer fremden Gruppe und unterhaltet euch (Beweisvideo)",
+      points: 5,
+      type: "video",
+    },
+
+    {
+      id: 19,
+      text: "Findet einen 'The Länd'-Sticker",
+      points: 1,
+      type: "image",
+    },
+
+    {
+      id: 20,
+      text: "Trinkt in einer Bar schnell einen Shot (Beweisfoto)",
+      points: 5,
+      type: "image",
+    },
   ],
-  3: [{ id: 24, text: "Comedy Sketch", points: 3, type: "video" }],
 };
 
 export default function EvaluationPage() {
